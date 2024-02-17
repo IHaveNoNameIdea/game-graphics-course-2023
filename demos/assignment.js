@@ -1,7 +1,7 @@
 import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3, vec4} from "../node_modules/gl-matrix/esm/index.js";
 
-import {positions, normals, indices} from "../blender/torus.js"
+import {positions, normals, indices} from "../blender/sphere.js"
 
 let vertexShader = `
     #version 300 es
