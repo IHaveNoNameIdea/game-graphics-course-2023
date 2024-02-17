@@ -72,7 +72,7 @@ function draw(timems) {
     let time = timems / 400;
 
     mat4.perspective(projMatrix, Math.PI / 4, app.width / app.height, 0.1, 50.0);
-    mat4.lookAt(viewMatrix, vec3.fromValues(2, 0, 1), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+    mat4.lookAt(viewMatrix, vec3.fromValues(5, 0, 4), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
     mat4.fromXRotation(rotateXMatrix, time * 0.1136);
