@@ -52,7 +52,7 @@ let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
 
 let vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions))
-    .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 6, normals))
+    .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 4, normals))
     .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, indices));
 
 let projMatrix = mat4.create();
