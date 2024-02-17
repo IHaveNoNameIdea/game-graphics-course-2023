@@ -69,7 +69,7 @@ let drawCall = app.createDrawCall(program, vertexArray)
     .uniform("fgColor", fgColor);
 
 function draw(timems) {
-    let time = timems / 1000;
+    let time = timems / 10000;
 
     mat4.perspective(projMatrix, Math.PI / 4, app.width / app.height, 0.1, 50.0);
     mat4.lookAt(viewMatrix, vec3.fromValues(3, 0, 2), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
