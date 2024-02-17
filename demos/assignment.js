@@ -48,7 +48,7 @@ app.clearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3])
     .enable(PicoGL.DEPTH_TEST)
     .enable(PicoGL.CULL_FACE);
 
-let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
+let program = app.createProgram(vertexShader.trim(2), fragmentShader.trim(4));
 
 let vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions))
