@@ -109,6 +109,18 @@ let shadowFragmentShader = `
     }
 `;
 
+let skyboxViewProjectionInverse = mat4.create();
+
+let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
+    .texture("cubemap", app.createCubemap({
+        negX: await loadTexture("stormydays_bk.png"),
+        posX: await loadTexture("stormydays_ft.png"),
+        negY: await loadTexture("stormydays_dn.png"),
+        posY: await loadTexture("stormydays_up.png"),
+        negZ: await loadTexture("stormydays_lf.png"),
+        posZ: await loadTexture("stormydays_rt.png")
+    }));
+    
 // language=GLSL
 let shadowVertexShader = `
     #version 300 es
@@ -224,6 +236,17 @@ function draw(timems) {
     mat4.perspective(projMatrix, Math.PI / 2.5, app.width / app.height, 0.1, 100.0);
     mat4.lookAt(viewMatrix, cameraPosition, vec3.fromValues(0, -0.5, 0), vec3.fromValues(0, 1, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+    let skyboxViewProjectionMatrix = mat4.create();
+    mat4.mul(skyboxViewProjectionMatrix, projMatrix, viewMatrix);
+    mat4.invert(skyboxViewProjectionInverse, skyboxViewProjectionMatrix);
+
+    app.clear();
+
+    app.disable(PicoGL.DEPTH_TEST);
+    app.disable(PicoGL.CULL_FACE);
+    skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
+    skyboxDrawCall.draw();
 
     vec3.set(lightPosition, 5, 5, 2.5);
     mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
