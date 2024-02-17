@@ -52,7 +52,7 @@ let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
 
 let vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions))
-    .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 3, normals))
+    .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 7, normals))
     .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, indices));
 
 let projMatrix = mat4.create();
@@ -72,7 +72,7 @@ function draw(timems) {
     let time = timems / 400;
 
     mat4.perspective(projMatrix, Math.PI / 4, app.width / app.height, 0.1, 50.0);
-    mat4.lookAt(viewMatrix, vec3.fromValues(5, 5, 4), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+    mat4.lookAt(viewMatrix, vec3.fromValues(7, 4, 8), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
     mat4.fromXRotation(rotateXMatrix, time * 0.1136);
