@@ -1,7 +1,7 @@
 import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3, vec4} from "../node_modules/gl-matrix/esm/index.js";
 
-import {positions, normals, indices} from "../blender/cube.js"
+import {positions, normals, indices} from "../blender/untitled.js"
 
 let vertexShader = `
     #version 300 es
@@ -51,7 +51,7 @@ app.clearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3])
 let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
 
 let vertexArray = app.createVertexArray()
-    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 4, positions))
+    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions))
     .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 4, normals))
     .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, indices));
 
