@@ -4,6 +4,7 @@ import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3, vec4, quat} from "../node_modules/gl-matrix/esm/index.js";
 
 import {positions, normals, indices} from "../blender/sphere.js";
+import {positions as planePositions, indices as planeIndices} from "../blender/plane.js";
 
 // language=GLSL
 let fragmentShader = `
@@ -63,6 +64,38 @@ let vertexShader = `
     }
 `;
 
+let skyboxFragmentShader = `
+    #version 300 es
+    precision mediump float;
+    
+    uniform samplerCube cubemap;
+    uniform mat4 viewProjectionInverse;
+    in vec4 v_position;
+    
+    out vec4 outColor;
+    
+    void main() {
+      vec4 t = viewProjectionInverse * v_position;
+      outColor = texture(cubemap, normalize(t.xyz / t.w));
+    }
+`;
+
+let skyboxVertexShader = `
+    #version 300 es
+    
+    layout(location=0) in vec4 position;
+    out vec4 v_position;
+    
+    void main() {
+      v_position = vec4(position.xz, 1.0, 1.0);
+      gl_Position = v_position;
+    }
+`;
+let skyboxProgram = app.createProgram(skyboxVertexShader.trim(), skyboxFragmentShader.trim());
+
+let skyboxArray = app.createVertexArray()
+    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, planePositions))
+    .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, planeIndices));
 // language=GLSL
 let shadowFragmentShader = `
     #version 300 es
