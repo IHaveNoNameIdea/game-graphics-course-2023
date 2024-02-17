@@ -26,7 +26,7 @@ let vertexShader = `
 `;
 
 let fragmentShader = `
-    #version 400 es
+    #version 300 es
     precision highp float;
     uniform float time;
     
