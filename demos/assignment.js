@@ -51,8 +51,8 @@ app.clearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3])
 let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
 
 let vertexArray = app.createVertexArray()
-    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 4, positions))
-    .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 3, normals))
+    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 7, positions))
+    .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 7, normals))
     .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, indices));
 
 let projMatrix = mat4.create();
