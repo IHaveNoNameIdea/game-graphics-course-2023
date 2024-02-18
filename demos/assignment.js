@@ -5,6 +5,24 @@ import {mat4, vec3, vec4, quat} from "../node_modules/gl-matrix/esm/index.js";
 
 import {positions, normals, indices, uvs} from "../blender/cube.js";
 
+let image = new Image();
+image.onload = function() {
+    let texture = app.createTexture2D(image, {
+        minFilter: PicoGL.LINEAR_MIPMAP_LINEAR,
+        magFilter: PicoGL.LINEAR,
+        wrapS: PicoGL.REPEAT,
+        wrapT: PicoGL.REPEAT
+    });
+    texture.generateMipmap();
+
+    // Now that the texture is loaded, you can start the rendering loop
+    requestAnimationFrame(draw);
+
+    // Update your draw call to use the texture
+    drawCall.texture("uTexture", texture);
+};
+image.src = "../demos/images/box.jpg";
+
 // language=GLSL
 let fragmentShader = `
     #version 300 es    
