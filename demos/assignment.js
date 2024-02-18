@@ -3,8 +3,7 @@
 import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3, vec4, quat} from "../node_modules/gl-matrix/esm/index.js";
 
-import {positions, normals, indices} from "../blender/sphere.js";
-import {positions as planePositions, indices as planeIndices} from "../blender/plane.js";
+import {positions, normals, indices} from "../blender/cube.js";
 
 // language=GLSL
 let fragmentShader = `
@@ -64,38 +63,6 @@ let vertexShader = `
     }
 `;
 
-let skyboxFragmentShader = `
-    #version 300 es
-    precision mediump float;
-    
-    uniform samplerCube cubemap;
-    uniform mat4 viewProjectionInverse;
-    in vec4 v_position;
-    
-    out vec4 outColor;
-    
-    void main() {
-      vec4 t = viewProjectionInverse * v_position;
-      outColor = texture(cubemap, normalize(t.xyz / t.w));
-    }
-`;
-
-let skyboxVertexShader = `
-    #version 300 es
-    
-    layout(location=0) in vec4 position;
-    out vec4 v_position;
-    
-    void main() {
-      v_position = vec4(position.xz, 1.0, 1.0);
-      gl_Position = v_position;
-    }
-`;
-let skyboxProgram = app.createProgram(skyboxVertexShader.trim(), skyboxFragmentShader.trim());
-
-let skyboxArray = app.createVertexArray()
-    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, planePositions))
-    .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, planeIndices));
 // language=GLSL
 let shadowFragmentShader = `
     #version 300 es
@@ -105,22 +72,10 @@ let shadowFragmentShader = `
     
     void main() {
         // Uncomment to see the depth buffer of the shadow map    
-        fragColor = vec4((gl_FragCoord.z - 0.98) * 50.0);    
+        //fragColor = vec4((gl_FragCoord.z - 0.98) * 50.0);    
     }
 `;
 
-let skyboxViewProjectionInverse = mat4.create();
-
-let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
-    .texture("cubemap", app.createCubemap({
-        negX: await loadTexture("stormydays_bk.png"),
-        posX: await loadTexture("stormydays_ft.png"),
-        negY: await loadTexture("stormydays_dn.png"),
-        posY: await loadTexture("stormydays_up.png"),
-        negZ: await loadTexture("stormydays_lf.png"),
-        posZ: await loadTexture("stormydays_rt.png")
-    }));
-    
 // language=GLSL
 let shadowVertexShader = `
     #version 300 es
@@ -236,17 +191,6 @@ function draw(timems) {
     mat4.perspective(projMatrix, Math.PI / 2.5, app.width / app.height, 0.1, 100.0);
     mat4.lookAt(viewMatrix, cameraPosition, vec3.fromValues(0, -0.5, 0), vec3.fromValues(0, 1, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-
-    let skyboxViewProjectionMatrix = mat4.create();
-    mat4.mul(skyboxViewProjectionMatrix, projMatrix, viewMatrix);
-    mat4.invert(skyboxViewProjectionInverse, skyboxViewProjectionMatrix);
-
-    app.clear();
-
-    app.disable(PicoGL.DEPTH_TEST);
-    app.disable(PicoGL.CULL_FACE);
-    skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
-    skyboxDrawCall.draw();
 
     vec3.set(lightPosition, 5, 5, 2.5);
     mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
