@@ -75,18 +75,18 @@ let skyboxFragmentShader = `
     out vec4 outColor;
     
     void main() {
-      vec4 t = viewProjectionInverse * v_position;
-      outColor = texture(cubemap, normalize(t.xyz / t.w));
+      vec4 t = viewProjectionInverse * vec4(v_position.xyz, 0.0);
+      outColor = texture(cubemap, normalize(t.xyz));
     }
 `;
 
 // language=GLSL
 let skyboxVertexShader = `
     #version 300 es
-
+    
     layout(location=0) in vec4 position;
     out vec4 v_position;
-
+    
     void main() {
       v_position = position;
       gl_Position = position;
@@ -97,17 +97,13 @@ let skyboxVertexShader = `
 // language=GLSL
 let shadowFragmentShader = `
     #version 300 es
-    precision mediump float;
+    precision highp float;
     
-    uniform samplerCube cubemap;
-    uniform mat4 viewProjectionInverse;
-    in vec4 v_position;
-    
-    out vec4 outColor;
+    out vec4 fragColor;
     
     void main() {
-      vec4 t = viewProjectionInverse * vec4(v_position.xyz, 0.0);
-      outColor = texture(cubemap, normalize(t.xyz));
+        // Uncomment to see the depth buffer of the shadow map    
+        //fragColor = vec4((gl_FragCoord.z - 0.98) * 50.0);    
     }
 `;
 
