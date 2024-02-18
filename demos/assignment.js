@@ -3,15 +3,26 @@
 import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3, vec4, quat} from "../node_modules/gl-matrix/esm/index.js";
 
+export const positions = new Float32Array([
+    // Positions data...
+]);
+export const normals = new Float32Array([
+    // Normals data...
+]);
+export const indices = new Uint32Array([
+    // Indices data...
+]);
+
+// Ensure you have this export for texCoords
+export const texCoords = new Float32Array([
+    0.0, 0.0,
+    1.0, 0.0,
+    1.0, 1.0,
+    0.0, 1.0,
+    // Add more as necessary...
+]);
+
 import {positions, normals, indices, texCoords} from "../blender/cube.js";
-//export const texCoords = new Float32Array([
-//    // Texture coordinates for each vertex
-//    0.0, 0.0,
-//    1.0, 0.0,
-//    1.0, 1.0,
-//    0.0, 1.0,
-//    // Repeat for each face of the cube or as necessary
-//]);
 
 // language=GLSL
 let fragmentShader = `
