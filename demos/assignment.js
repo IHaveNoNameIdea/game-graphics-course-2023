@@ -179,16 +179,6 @@ async function loadTexture(fileName) {
     return await createImageBitmap(await (await fetch("images/" + fileName)).blob());
 }
 
-const tex = await loadTexture("abstract.jpg");
-let drawCall = app.createDrawCall(program, vertexArray)
-    .texture("tex", app.createTexture2D(tex, tex.width, tex.height, {
-        magFilter: PicoGL.LINEAR,
-        minFilter: PicoGL.LINEAR_MIPMAP_LINEAR,
-        maxAnisotropy: 10,
-        wrapS: PicoGL.REPEAT,
-        wrapT: PicoGL.REPEAT
-    }));
-
 let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
     .texture("cubemap", app.createCubemap({
         negX: await loadTexture("space_bk.png"),
