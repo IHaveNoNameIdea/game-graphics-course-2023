@@ -212,13 +212,30 @@ function renderShadowMap() {
     app.defaultViewport();
 }
 
+function updateModelMatrix() {
+    // Fixed position
+    const position = vec3.fromValues(0, 0, 0); // Keep the object at the origin
+
+    // Dynamic rotation based on time
+    const angleDegrees = time * 45.0; // Rotate 45 degrees per second
+    const angleRadians = angleDegrees * (Math.PI / 180);
+    quat.fromEuler(rotation, 0, angleRadians, 0); // Rotate around Y-axis
+
+    // Scale (if you want to scale the object, otherwise just use [1, 1, 1])
+    const scale = vec3.fromValues(1, 1, 1);
+
+    // Update model matrix
+    mat4.fromRotationTranslationScale(modelMatrix, rotation, position, scale);
+}
+
+
 function drawObjects(dc) {
     app.clear();
 
     // Middle object - Moves up and down
     let middleBoxMovement = Math.sin(time) * 0.5;
     quat.fromEuler(rotation, time * 80, time * 56.97, 0);
-    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(1, middleBoxMovement, 5), [0.8, 0.8, 0.8]);
+    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(0, middleBoxMovement, 0), [0.8, 0.8, 0.8]);
     mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
     mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
     dc.draw();
