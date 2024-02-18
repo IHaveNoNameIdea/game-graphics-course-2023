@@ -273,6 +273,7 @@ function draw(timems) {
     mat4.multiply(skyboxViewProjectionMatrix, projMatrix, skyboxViewMatrix);
 
     // Render skybox
+    gl.disable(gl.DEPTH_TEST);
     skyboxDrawCall.uniform("viewProjectionMatrix", skyboxViewProjectionMatrix);
     skyboxDrawCall.draw();
 
