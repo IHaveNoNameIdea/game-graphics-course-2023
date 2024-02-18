@@ -122,7 +122,7 @@ let fgColor = vec4.fromValues(1.0, 0.9, 0.5, 1.0);
 
 app.enable(PicoGL.DEPTH_TEST)
    .enable(PicoGL.CULL_FACE)
-   .clearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
+//   .clearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
 
 let program = app.createProgram(vertexShader, fragmentShader);
 let skyboxProgram = app.createProgram(skyboxVertexShader.trim(), skyboxFragmentShader.trim());
