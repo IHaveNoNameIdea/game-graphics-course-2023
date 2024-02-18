@@ -218,7 +218,7 @@ function drawObjects(dc) {
     // Middle object - Moves up and down
     let middleBoxMovement = Math.sin(time) * 0.5;
     quat.fromEuler(rotation, time * 80, time * 56.97, 0);
-    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(0, middleBoxMovement, 0), [0.8, 0.8, 0.8]);
+    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(5, middleBoxMovement, 0), [0.8, 0.8, 0.8]);
     mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
     mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
     dc.draw();
