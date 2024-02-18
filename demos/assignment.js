@@ -4,7 +4,7 @@ import {mat4, vec3} from "../node_modules/gl-matrix/esm/index.js";
 import {positions, normals, indices} from "../blender/ship1.js"
 import {positions as planePositions, indices as planeIndices} from "../blender/plane.js";
 
-let baseColor = vec3.fromValues(1.0, 0.1, 0.2);
+//let baseColor = vec3.fromValues(1.0, 0.1, 0.2);
 let ambientLightColor = vec3.fromValues(0.1, 0.1, 1.0);
 let numberOfPointLights = 2;
 let pointLightColors = [vec3.fromValues(1.0, 1.0, 1.0), vec3.fromValues(0.02, 0.4, 0.5)];
@@ -209,13 +209,12 @@ function draw(timestamp) {
     drawCall.uniform("lightPositions[0]", positionsBuffer);
     drawCall.uniform("lightColors[0]", colorsBuffer);
 
+    app.clear(PicoGL.COLOR_BUFFER_BIT | PicoGL.DEPTH_BUFFER_BIT);
+    app.disable(PicoGL.DEPTH_TEST);
+    app.disable(PicoGL.CULL_FACE);
     let skyboxViewProjectionMatrix = mat4.create();
     mat4.mul(skyboxViewProjectionMatrix, projMatrix, viewMatrix);
     mat4.invert(skyboxViewProjectionInverse, skyboxViewProjectionMatrix);
-
-    app.clear();
-    app.disable(PicoGL.DEPTH_TEST);
-    app.disable(PicoGL.CULL_FACE);
     skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
     skyboxDrawCall.draw();
 
