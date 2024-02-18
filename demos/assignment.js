@@ -248,7 +248,7 @@ function drawObjects(dc) {
 
 
 function draw(timems) {
-    const time = timems * 0.01; // Use for dynamic elements
+    const time = timems * 0.001; // Use for dynamic elements
 
     // Perspective and camera setup from the second snippet with slight modifications for dynamic camera positioning
     vec3.set(cameraPosition, Math.sin(time * 0.05) * 4, 2, Math.cos(time * 0.05) * 4);
