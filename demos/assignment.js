@@ -1,6 +1,8 @@
 // Shadow mapping demo
 
 import {positions, normals, indices, uvs} from "../blender/cube.js";
+import { vec4, mat4, quat, vec3 } from 'gl-matrix';
+import * as PicoGL from 'picogl';
 
 let app; 
 let image = new Image();
