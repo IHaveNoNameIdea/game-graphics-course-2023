@@ -137,7 +137,13 @@ let skyboxVertexShader = `
 app.enable(PicoGL.DEPTH_TEST)
    .enable(PicoGL.CULL_FACE);
 
-let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
+   let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
+   if (!program) {
+       console.error("Failed to create program.");
+       let log = app.gl.getProgramInfoLog(program);
+       console.error("Program Info Log:", log);
+   } else {}
+
 let skyboxProgram = app.createProgram(skyboxVertexShader.trim(), skyboxFragmentShader.trim());
 
 let vertexArray = app.createVertexArray()
