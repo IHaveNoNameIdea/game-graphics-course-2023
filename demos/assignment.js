@@ -89,7 +89,7 @@ let skyboxVertexShader = `
     
     void main() {
         v_position = position;
-        gl_Position = position * vec4(1.0, 1.0, 1.0, 0.0);
+        gl_Position = projectionMatrix * viewMatrix * vec4(position, 1.0);
     }
     
 `;
@@ -277,6 +277,7 @@ function draw(timems) {
     app.clear();
 
     app.depthMask(false);
+    gl.depthFunc(gl.LEQUAL);
     app.enable(PicoGL.DEPTH_TEST);
     app.disable(PicoGL.CULL_FACE);
     skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
