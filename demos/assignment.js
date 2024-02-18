@@ -202,7 +202,7 @@ function renderShadowMap() {
     app.gl.cullFace(app.gl.FRONT);
 
     // Projection and view matrices are changed to render objects from the point view of light source
-    mat4.perspective(projMatrix, Math.PI * 0.1, shadowDepthTarget.width / shadowDepthTarget.height, 0.1, 100.0);
+    mat4.perspective(projMatrix, Math.PI * 2, shadowDepthTarget.width / shadowDepthTarget.height, 0.1, 100.0);
     mat4.multiply(lightViewProjMatrix, projMatrix, lightViewMatrix);
 
     drawObjects(shadowDrawCall);
@@ -249,7 +249,7 @@ function draw(timems) {
     // Perspective and camera setup from the second snippet with slight modifications for dynamic camera positioning
     vec3.set(cameraPosition, Math.sin(time * 0.05) * 4, 2, Math.cos(time * 0.05) * 4);
     mat4.perspective(projMatrix, Math.PI / 2.5, app.width / app.height, 0.1, 100.0);
-    mat4.lookAt(viewMatrix, cameraPosition, vec3.fromValues(0, -1, 0), vec3.fromValues(4, 0, 0));
+    mat4.lookAt(viewMatrix, cameraPosition, vec3.fromValues(0, -1, 0), vec3.fromValues(0, 3, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
     // Light position and shadow mapping from the second snippet
