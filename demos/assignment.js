@@ -285,7 +285,7 @@ function draw(timems) {
     // Draw objects with shadows
     app.enable(PicoGL.DEPTH_TEST);
     app.enable(PicoGL.CULL_FACE);
-    //drawObjects(drawCall); // Assuming drawObjects() handles drawing with the shadow map
+    drawObjects(drawCall); // Assuming drawObjects() handles drawing with the shadow map
 
     requestAnimationFrame(draw);
 }
