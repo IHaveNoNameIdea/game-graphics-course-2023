@@ -84,14 +84,15 @@ let skyboxFragmentShader = `
 let skyboxVertexShader = `
     #version 300 es
     
-    layout(location=0) in vec4 position;
-    out vec4 v_position;
+    uniform mat4 viewProjectionMatrix; // Add this uniform
+    layout(location=0) in vec3 position;
+    out vec3 v_position;
     
     void main() {
-        v_position = position;
-        gl_Position = position * vec4(1.0, 1.0, 1.0, 0.0);
+      v_position = position; // Pass the position directly
+      vec4 clipSpacePos = viewProjectionMatrix * vec4(position, 1.0);
+      gl_Position = clipSpacePos.xyww; // Adjust depth value
     }
-    
 `;
 
 // language=GLSL
@@ -270,16 +271,25 @@ function draw(timems) {
     skyboxViewMatrix[13] = 0;
     skyboxViewMatrix[14] = 0;
 
-    let skyboxViewProjectionMatrix = mat4.create();
-    mat4.mul(skyboxViewProjectionMatrix, projMatrix, mat4.lookAt(mat4.create(), cameraPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)));
-    mat4.invert(skyboxViewProjectionInverse, skyboxViewProjectionMatrix);
+//    let skyboxViewProjectionMatrix = mat4.create();
+//    mat4.mul(skyboxViewProjectionMatrix, projMatrix, mat4.lookAt(mat4.create(), cameraPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)));
+//    mat4.invert(skyboxViewProjectionInverse, skyboxViewProjectionMatrix);
 
     app.clear();
 
+    let viewMatrixForSkybox = mat4.clone(viewMatrix);
+    viewMatrixForSkybox[12] = 0;
+    viewMatrixForSkybox[13] = 0;
+    viewMatrixForSkybox[14] = 0;
+    let skyboxViewProjectionMatrix = mat4.create();
+    mat4.multiply(skyboxViewProjectionMatrix, projMatrix, viewMatrixForSkybox);
     app.depthMask(false);
     app.enable(PicoGL.DEPTH_TEST);
     app.disable(PicoGL.CULL_FACE);
+    skyboxDrawCall.uniform("viewProjectionMatrix", skyboxViewProjectionMatrix);
     skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
+    app.clear(PicoGL.COLOR_BUFFER_BIT | PicoGL.DEPTH_BUFFER_BIT);
+    app.depthMask(false);
     skyboxDrawCall.draw();
     app.depthMask(true);
 
