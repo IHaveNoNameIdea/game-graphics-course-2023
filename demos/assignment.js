@@ -246,45 +246,46 @@ function drawObjects(dc) {
 
 
 function draw(timems) {
-    const time = timems * 0.001; // Use a consistent time scale for animations
+    const time = timems * 0.001; // Use for dynamic elements
 
-    // Perspective and camera setup for the scene and skybox
+    // Perspective and camera setup from the second snippet with slight modifications for dynamic camera positioning
+    vec3.set(cameraPosition, Math.sin(time * 0.05) * 4, 2, Math.cos(time * 0.05) * 4);
     mat4.perspective(projMatrix, Math.PI / 2.5, app.width / app.height, 0.1, 100.0);
-    let camPos = vec3.rotateY(vec3.create(), vec3.fromValues(0, 2, 4), vec3.fromValues(0, 0, 0), time * 0.05);
-    mat4.lookAt(viewMatrix, camPos, vec3.fromValues(0, -0.5, 0), vec3.fromValues(0, 1, 0));
+    mat4.lookAt(viewMatrix, cameraPosition, vec3.fromValues(0, -0.5, 0), vec3.fromValues(0, 1, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-    // Camera setup for dynamic objects and shadow map
-    vec3.set(lightPosition, 5, 5, 2.5); // Position of the light
+    // Light position and shadow mapping from the second snippet
+    vec3.set(lightPosition, 5, 5, 2.5);
     mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
-
-    // Render shadow map first
     renderShadowMap();
 
-    // Clear buffers and setup for skybox rendering
+    // Combined model transformations from the first snippet
+    mat4.fromXRotation(rotateXMatrix, time * 0.1136);
+    mat4.fromZRotation(rotateYMatrix, time * 0.2235);
+    mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+
+    mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
+    mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
+
+    // Prepare skybox specific matrices
+    let skyboxViewProjectionMatrix = mat4.create();
+    mat4.mul(skyboxViewProjectionMatrix, projMatrix, mat4.lookAt(mat4.create(), cameraPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)));
+    mat4.invert(skyboxViewProjectionInverse, skyboxViewProjectionMatrix);
+
     app.clear();
+
+    // Draw skybox
     app.disable(PicoGL.DEPTH_TEST);
     app.disable(PicoGL.CULL_FACE);
-
-    // Adjust the skybox view matrix to remove translation for infinite distance effect
-    let skyboxViewMatrix = mat4.clone(viewMatrix);
-    skyboxViewMatrix[12] = 0; // Remove translation component
-    skyboxViewMatrix[13] = 0;
-    skyboxViewMatrix[14] = 0;
-    let skyboxViewProjectionMatrix = mat4.create();
-    mat4.multiply(skyboxViewProjectionMatrix, projMatrix, skyboxViewMatrix);
-
-    // Render skybox
-    skyboxDrawCall.uniform("viewProjectionMatrix", skyboxViewProjectionMatrix);
+    skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
     skyboxDrawCall.draw();
 
-    // Re-enable depth test for rendering scene objects
+    // Draw objects with shadows
     app.enable(PicoGL.DEPTH_TEST);
     app.enable(PicoGL.CULL_FACE);
-
-    // Draw scene objects with shadows
-    drawObjects(drawCall);
+    drawObjects(drawCall); // Assuming drawObjects() handles drawing with the shadow map
 
     requestAnimationFrame(draw);
 }
+
 requestAnimationFrame(draw);
