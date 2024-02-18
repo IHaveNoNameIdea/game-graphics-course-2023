@@ -83,26 +83,31 @@ let skyboxFragmentShader = `
 // language=GLSL
 let skyboxVertexShader = `
     #version 300 es
-    
+
     layout(location=0) in vec4 position;
     out vec4 v_position;
-    
+
     void main() {
       v_position = position;
-
+      gl_Position = position;
+      gl_Position.w = 1.0; // Ensure the points are at the clip space border
     }
 `;
 
 // language=GLSL
 let shadowFragmentShader = `
     #version 300 es
-    precision highp float;
+    precision mediump float;
     
-    out vec4 fragColor;
+    uniform samplerCube cubemap;
+    uniform mat4 viewProjectionInverse;
+    in vec4 v_position;
+    
+    out vec4 outColor;
     
     void main() {
-        // Uncomment to see the depth buffer of the shadow map    
-        //fragColor = vec4((gl_FragCoord.z - 0.98) * 50.0);    
+      vec4 t = viewProjectionInverse * vec4(v_position.xyz, 0.0);
+      outColor = texture(cubemap, normalize(t.xyz));
     }
 `;
 
