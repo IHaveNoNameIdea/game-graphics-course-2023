@@ -278,10 +278,12 @@ function draw(timems) {
     app.clear();
 
     // Draw skybox
-    app.disable(PicoGL.DEPTH_TEST);
+    app.depthMask(false);
+    app.enable(PicoGL.DEPTH_TEST);
     app.disable(PicoGL.CULL_FACE);
     skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
     skyboxDrawCall.draw();
+    app.depthMask(true);
 
     // Draw objects with shadows
     app.enable(PicoGL.DEPTH_TEST);
