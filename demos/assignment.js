@@ -56,6 +56,9 @@ let fragmentShader = `
     precision highp float;        
     ${lightCalculationShader}        
     
+    uniform sampler2D tex; 
+
+    in vec2 v_uv;
     in vec3 vPosition;    
     in vec3 vNormal;
     in vec4 vColor;    
@@ -78,8 +81,10 @@ let vertexShader = `
     layout(location=1) in vec4 normal;
     
     uniform mat4 viewProjectionMatrix;
+    uniform mat4 modelViewProjectionMatrix;
     uniform mat4 modelMatrix;            
     
+    out vec2 v_uv;
     out vec3 vPosition;    
     out vec3 vNormal;
     out vec4 vColor;
@@ -93,7 +98,8 @@ let vertexShader = `
         // For Gouraud shading (per-vertex) move color calculation from fragment to vertex shader
         //vColor = calculateLights(normalize(vNormal), vPosition);
         
-        gl_Position = viewProjectionMatrix * worldPosition;                        
+        gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);           
+        v_uv = uv;                       
     }
 `;
 
@@ -142,11 +148,15 @@ let vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, planePositions))
     .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, planeIndices));
 
-let projectionMatrix = mat4.create();
-let viewMatrix = mat4.create();
-let viewProjectionMatrix = mat4.create();
-let modelMatrix = mat4.create();
-let skyboxViewProjectionInverse = mat4.create();
+    let projMatrix = mat4.create();
+    let viewMatrix = mat4.create();
+    let viewProjMatrix = mat4.create();
+    let modelMatrix = mat4.create();
+    let modelViewMatrix = mat4.create();
+    let modelViewProjectionMatrix = mat4.create();
+    let rotateXMatrix = mat4.create();
+    let rotateYMatrix = mat4.create();
+    let skyboxViewProjectionInverse = mat4.create();
 
 async function loadTexture(fileName) {
     return await createImageBitmap(await (await fetch("images/" + fileName)).blob());
@@ -164,12 +174,12 @@ let drawCall = app.createDrawCall(program, vertexArray)
 
     let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
     .texture("cubemap", app.createCubemap({
-        negX: await loadTexture("stormydays_bk.png"),
-        posX: await loadTexture("stormydays_ft.png"),
-        negY: await loadTexture("stormydays_dn.png"),
-        posY: await loadTexture("stormydays_up.png"),
-        negZ: await loadTexture("stormydays_lf.png"),
-        posZ: await loadTexture("stormydays_rt.png")
+        negX: await loadTexture("space_bk.png"),
+        posX: await loadTexture("space_ft.png"),
+        negY: await loadTexture("space_dn.png"),
+        posY: await loadTexture("space_up.png"),
+        negZ: await loadTexture("space_lf.png"),
+        posZ: await loadTexture("space_rt.png")
     }));
 
 let cameraPosition = vec3.fromValues(0, 0, 2);
