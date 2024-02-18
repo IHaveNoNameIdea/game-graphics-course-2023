@@ -67,13 +67,13 @@ let vertexShader = `
 let skyboxFragmentShader = `
     #version 300 es
     precision mediump float;
-    
+
     uniform samplerCube cubemap;
     uniform mat4 viewProjectionInverse;
     in vec4 v_position;
-    
+
     out vec4 outColor;
-    
+
     void main() {
       vec4 t = viewProjectionInverse * vec4(v_position.xyz, 0.0);
       outColor = texture(cubemap, normalize(t.xyz));
@@ -183,8 +183,6 @@ async function loadTexture(fileName) {
     return await createImageBitmap(await (await fetch("images/" + fileName)).blob());
 }
 
-
-
 let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
     .texture("cubemap", app.createCubemap({
         negX: await loadTexture("space_bk.png"),
@@ -287,7 +285,7 @@ function draw(timems) {
     // Draw objects with shadows
     app.enable(PicoGL.DEPTH_TEST);
     app.enable(PicoGL.CULL_FACE);
-    drawObjects(drawCall); // Assuming drawObjects() handles drawing with the shadow map
+    //drawObjects(drawCall); // Assuming drawObjects() handles drawing with the shadow map
 
     requestAnimationFrame(draw);
 }
