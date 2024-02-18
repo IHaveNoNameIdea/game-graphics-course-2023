@@ -63,36 +63,6 @@ let vertexShader = `
     }
 `;
 
-let skyboxFragmentShader = `
-    #version 300 es
-    precision mediump float;
-    
-    uniform samplerCube cubemap;
-    uniform mat4 viewProjectionInverse;
-    in vec4 v_position;
-    
-    out vec4 outColor;
-    
-    void main() {
-      vec4 t = viewProjectionInverse * v_position;
-      outColor = texture(cubemap, normalize(t.xyz / t.w));
-    }
-`;
-
-// language=GLSL
-const skyboxVertexShader = `
-    #version 300 es
-    layout(location=0) in vec3 position;
-    out vec3 vPosition;
-    uniform mat4 projectionMatrix;
-    uniform mat4 viewMatrix;
-    void main() {
-        vPosition = position;
-        gl_Position = projectionMatrix * viewMatrix * vec4(position, 1.0);
-        gl_Position.z = gl_Position.w; // Move the depth to the far plane to ensure the skybox is rendered as background.
-    }
-`;
-
 // language=GLSL
 let shadowFragmentShader = `
     #version 300 es
@@ -157,16 +127,6 @@ let lightPosition = vec3.create();
 let lightViewMatrix = mat4.create();
 let lightViewProjMatrix = mat4.create();
 
-let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
-    .texture("cubemap", app.createCubemap({
-        negX: await loadTexture("space_bk.png"),
-        posX: await loadTexture("space_ft.png"),
-        negY: await loadTexture("space_dn.png"),
-        posY: await loadTexture("space_up.png"),
-        negZ: await loadTexture("space_lf.png"),
-        posZ: await loadTexture("space_rt.png")
-    }));
-
 let drawCall = app.createDrawCall(program, vertexArray)
     .uniform("baseColor", fgColor)
     .uniform("ambientColor", vec4.scale(vec4.create(), bgColor, 0.7))
@@ -230,32 +190,6 @@ function drawObjects(dc) {
     dc.draw();
 }
 
-function renderSkybox() {
-    let skyboxProgram = app.createProgram(skyboxVertexShader, skyboxFragmentShader);
-    let skyboxArray = app.createVertexArray()
-        .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions)); // Use positions that represent a cube around the origin
-
-    app.disable(PicoGL.DEPTH_TEST); // Disable depth testing
-    app.depthMask(false); // Disable depth writing
-    
-    let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
-        .texture("skybox", skyboxTexture);
-
-    // Adjust view matrix to remove translation (skybox should not appear to move with the camera)
-    let skyboxViewMatrix = mat4.create();
-    mat4.copy(skyboxViewMatrix, viewMatrix);
-    skyboxViewMatrix[12] = 0;
-    skyboxViewMatrix[13] = 0;
-    skyboxViewMatrix[14] = 0;
-
-    skyboxDrawCall.uniform("viewMatrix", skyboxViewMatrix)
-                   .uniform("projectionMatrix", projMatrix);
-    
-    skyboxDrawCall.draw();
-
-    app.enable(PicoGL.DEPTH_TEST); // Re-enable depth testing
-    app.depthMask(true); // Re-enable depth writing
-}
 
 function draw(timems) {
     time = timems * 0.0001;
