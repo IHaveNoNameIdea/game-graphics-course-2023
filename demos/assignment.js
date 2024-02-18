@@ -159,30 +159,37 @@ function renderShadowMap() {
 function drawObjects(dc) {
     app.clear();
 
-    // Middle object
+    // Middle object - Moves up and down
+    let middleBoxMovement = Math.sin(time) * 0.5;
     quat.fromEuler(rotation, time * 48.24, time * 56.97, 0);
-    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(0, 0, 0), [0.8, 0.8, 0.8]);
+    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(0, middleBoxMovement, 0), [0.8, 0.8, 0.8]);
     mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
     mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
-
     dc.draw();
 
-    // Large object
+    // Large object - Rotates around a point
+    let largeBoxAngle = time;
+    let largeBoxRadius = 2.0; // Radius of the rotation
+    let largeBoxX = Math.cos(largeBoxAngle) * largeBoxRadius - 2.4;
+    let largeBoxZ = Math.sin(largeBoxAngle) * largeBoxRadius - 1.2;
     quat.fromEuler(rotation, time * 12, time * 14, 0);
-    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(-2.4, -2.4, -1.2), [2, 2, 2]);
+    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(largeBoxX, -2.4, largeBoxZ), [2, 2, 2]);
     mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
     mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
-
     dc.draw();
 
-    // Small object
+    // Small object - Moves in a circle
+    let smallBoxAngle = time * 1.5; // Faster circular movement
+    let smallBoxRadius = 0.6; // Smaller radius for tighter circle
+    let smallBoxX = Math.cos(smallBoxAngle) * smallBoxRadius + 0.9;
+    let smallBoxZ = Math.sin(smallBoxAngle) * smallBoxRadius + 0.6;
     quat.fromEuler(rotation, time * 15, time * 17, 0);
-    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(0.9, 0.9, 0.6), [0.22, 0.22, 0.22]);
+    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(smallBoxX, 0.9, smallBoxZ), [0.22, 0.22, 0.22]);
     mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
     mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
-
     dc.draw();
 }
+
 
 function draw(timems) {
     time = timems * 0.001;
