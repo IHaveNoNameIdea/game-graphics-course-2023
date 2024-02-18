@@ -202,7 +202,7 @@ function renderShadowMap() {
     app.gl.cullFace(app.gl.FRONT);
 
     // Projection and view matrices are changed to render objects from the point view of light source
-    mat4.perspective(projMatrix, Math.PI * 2, shadowDepthTarget.width / shadowDepthTarget.height, 0.1, 100.0);
+    mat4.perspective(projMatrix, Math.PI * 5, shadowDepthTarget.width / shadowDepthTarget.height, 0.1, 100.0);
     mat4.multiply(lightViewProjMatrix, projMatrix, lightViewMatrix);
 
     drawObjects(shadowDrawCall);
