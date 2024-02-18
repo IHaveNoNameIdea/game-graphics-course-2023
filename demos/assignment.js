@@ -130,6 +130,7 @@ let skyboxVertexShader = `
       gl_Position = position.xyww;
     }
 `;
+app.clearColor(0.0, 0.0, 0.0, 1.0).clear();
 
 let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
 let skyboxProgram = app.createProgram(skyboxVertexShader.trim(), skyboxFragmentShader.trim());
