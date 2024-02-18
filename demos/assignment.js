@@ -223,17 +223,6 @@ function drawObjects(dc) {
     mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
     dc.draw();
 
-    // Large object - Rotates around a point
-    let largeBoxAngle = time;
-    let largeBoxRadius = 2.0; // Radius of the rotation
-    let largeBoxX = Math.cos(largeBoxAngle) * largeBoxRadius - 2.4;
-    let largeBoxZ = Math.sin(largeBoxAngle) * largeBoxRadius - 1.2;
-    quat.fromEuler(rotation, time * 12, time * 14, 0);
-    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(largeBoxX, -2.4, largeBoxZ), [2, 2, 2]);
-    mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
-    mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
-    dc.draw();
-
     // Small object - Moves in a circle
     let smallBoxAngle = time * 10; // Faster circular movement
     let smallBoxRadius = 0.8; // Smaller radius for tighter circle
