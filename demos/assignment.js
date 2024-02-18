@@ -135,8 +135,8 @@ let vertexArray = app.createVertexArray()
 
 
 let skyboxArray = app.createVertexArray()
-    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, Positions))
-    .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, Indices));
+    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, planePositions))
+    .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, planeIndices));
 
 
 // Change the shadow texture resolution to checkout the difference
@@ -270,14 +270,12 @@ function draw(timems) {
     mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
     mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
 
-    // Prepare skybox specific matrices
     let skyboxViewProjectionMatrix = mat4.create();
     mat4.mul(skyboxViewProjectionMatrix, projMatrix, mat4.lookAt(mat4.create(), cameraPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)));
     mat4.invert(skyboxViewProjectionInverse, skyboxViewProjectionMatrix);
 
     app.clear();
 
-    // Draw skybox
     app.depthMask(false);
     app.enable(PicoGL.DEPTH_TEST);
     app.disable(PicoGL.CULL_FACE);
