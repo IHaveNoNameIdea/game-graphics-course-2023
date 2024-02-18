@@ -119,8 +119,8 @@ let drawCall = app.createDrawCall(program, vertexArray)
 let cameraPosition = vec3.fromValues(0, 0, 8);
 mat4.fromXRotation(modelMatrix, -Math.PI / 2);
 
-const positionsBuffer = new Float32Array(numberOfPointLights * 5);
-const colorsBuffer = new Float32Array(numberOfPointLights * 3);
+const positionsBuffer = new Float32Array(numberOfPointLights * 3);
+const colorsBuffer = new Float32Array(numberOfPointLights * 5);
 
 function draw(timestamp) {
     const time = timestamp * 0.001;
