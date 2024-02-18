@@ -257,7 +257,7 @@ function draw(timems) {
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
     // Light position and shadow mapping from the second snippet
-    vec3.set(lightPosition, 5, 5, 2.5);
+    vec3.set(lightPosition, 5, 5, 3.5);
     mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
     renderShadowMap();
 
