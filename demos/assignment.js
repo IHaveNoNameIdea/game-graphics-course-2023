@@ -179,6 +179,8 @@ async function loadTexture(fileName) {
     return await createImageBitmap(await (await fetch("images/" + fileName)).blob());
 }
 
+
+
 let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
     .texture("cubemap", app.createCubemap({
         negX: await loadTexture("space_bk.png"),
@@ -273,7 +275,6 @@ function draw(timems) {
     mat4.multiply(skyboxViewProjectionMatrix, projMatrix, skyboxViewMatrix);
 
     // Render skybox
-    gl.disable(gl.DEPTH_TEST);
     skyboxDrawCall.uniform("viewProjectionMatrix", skyboxViewProjectionMatrix);
     skyboxDrawCall.draw();
 
