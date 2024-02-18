@@ -277,7 +277,6 @@ function draw(timems) {
     app.clear();
 
     app.depthMask(false);
-    gl.depthFunc(gl.LEQUAL);
     app.enable(PicoGL.DEPTH_TEST);
     app.disable(PicoGL.CULL_FACE);
     skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
