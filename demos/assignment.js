@@ -172,7 +172,7 @@ let drawCall = app.createDrawCall(program, vertexArray)
         posZ: await loadTexture("stormydays_rt.png")
     }));
 
-let cameraPosition = vec3.fromValues(0, 0, 8);
+let cameraPosition = vec3.fromValues(0, 0, 2);
 mat4.fromXRotation(modelMatrix, -Math.PI / 2);
 
 const positionsBuffer = new Float32Array(numberOfPointLights * 3);
