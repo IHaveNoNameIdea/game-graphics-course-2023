@@ -88,10 +88,10 @@ let skyboxVertexShader = `
     out vec4 v_position;
     
     void main() {
-      v_position = position;
-      gl_Position = position;
-      gl_Position.w = 1.0; // Ensure the points are at the clip space border
+        v_position = position;
+        gl_Position = position * vec4(1.0, 1.0, 1.0, 0.0);
     }
+    
 `;
 
 // language=GLSL
@@ -268,6 +268,11 @@ function draw(timems) {
 
     mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
     mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
+
+    let skyboxViewMatrix = mat4.clone(viewMatrix);
+    skyboxViewMatrix[12] = 0; // Reset the translation component of the view matrix
+    skyboxViewMatrix[13] = 0;
+    skyboxViewMatrix[14] = 0;
 
     let skyboxViewProjectionMatrix = mat4.create();
     mat4.mul(skyboxViewProjectionMatrix, projMatrix, mat4.lookAt(mat4.create(), cameraPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)));
