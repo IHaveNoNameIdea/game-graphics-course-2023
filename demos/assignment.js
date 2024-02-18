@@ -7,7 +7,7 @@
 import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3} from "../node_modules/gl-matrix/esm/index.js";
 
-import {positions, uvs, indices} from "../blender/box.js";
+import {positions, uvs, indices} from "../blender/cube.js";
 import {positions as planePositions, indices as planeIndices} from "../blender/plane.js";
 
 // language=GLSL
@@ -103,7 +103,7 @@ async function loadTexture(fileName) {
     return await createImageBitmap(await (await fetch("images/" + fileName)).blob());
 }
 
-const tex = await loadTexture("abstract.jpg");
+const tex = await loadTexture("box.jpg");
 let drawCall = app.createDrawCall(program, vertexArray)
     .texture("tex", app.createTexture2D(tex, tex.width, tex.height, {
         magFilter: PicoGL.LINEAR,
