@@ -1,12 +1,14 @@
 // Shadow mapping demo
 
-import PicoGL from "../node_modules/picogl/build/module/picogl.js";
-import {mat4, vec3, vec4, quat} from "../node_modules/gl-matrix/esm/index.js";
-
 import {positions, normals, indices, uvs} from "../blender/cube.js";
 
+let app; 
 let image = new Image();
 image.onload = function() {
+    app = PicoGL.createApp(document.body) 
+        .enable(PicoGL.DEPTH_TEST)
+        .enable(PicoGL.CULL_FACE);
+    
     let texture = app.createTexture2D(image, {
         minFilter: PicoGL.LINEAR_MIPMAP_LINEAR,
         magFilter: PicoGL.LINEAR,
@@ -15,11 +17,7 @@ image.onload = function() {
     });
     texture.generateMipmap();
 
-    // Now that the texture is loaded, you can start the rendering loop
     requestAnimationFrame(draw);
-
-    // Update your draw call to use the texture
-    drawCall.texture("uTexture", texture);
 };
 image.src = "../demos/images/box.jpg";
 
