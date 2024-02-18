@@ -10,6 +10,50 @@ import {mat4, vec3} from "../node_modules/gl-matrix/esm/index.js";
 import {positions, uvs, indices} from "../blender/cube.js";
 import {positions as planePositions, indices as planeIndices} from "../blender/plane.js";
 
+let baseColor = vec3.fromValues(1.0, 0.1, 0.2);
+let ambientLightColor = vec3.fromValues(0.1, 0.1, 1.0);
+let numberOfPointLights = 2;
+let pointLightColors = [vec3.fromValues(1.0, 1.0, 1.0), vec3.fromValues(0.02, 0.4, 0.5)];
+let pointLightInitialPositions = [vec3.fromValues(5, 0, 2), vec3.fromValues(-5, 0, 2)];
+let pointLightPositions = [vec3.create(), vec3.create()];
+
+let lightCalculationShader = `
+    uniform vec3 cameraPosition;
+    uniform vec3 baseColor;    
+
+    uniform vec3 ambientLightColor;    
+    uniform vec3 lightColors[${numberOfPointLights}];        
+    uniform vec3 lightPositions[${numberOfPointLights}];
+    
+    // This function calculates light reflection using Phong reflection model (ambient + diffuse + specular)
+    vec4 calculateLights(vec3 normal, vec3 position) {
+        float ambientIntensity = 0.5;
+        float diffuseIntensity = 1.0;
+        float specularIntensity = 2.0;
+        float specularPower = 100.0;
+        float metalness = 0.0;
+
+        vec3 viewDirection = normalize(cameraPosition.xyz - position);
+        vec3 color = baseColor * ambientLightColor * ambientIntensity;
+                
+        for (int i = 0; i < lightPositions.length(); i++) {
+            vec3 lightDirection = normalize(lightPositions[i] - position);
+            
+            // Lambertian reflection (ideal diffuse of matte surfaces) is also a part of Phong model                        
+            float diffuse = max(dot(lightDirection, normal), 0.0);                                    
+            color += baseColor * lightColors[i] * diffuse * diffuseIntensity;
+                      
+            // Phong specular highlight 
+            float specular = pow(max(dot(viewDirection, reflect(-lightDirection, normal)), 0.0), specularPower);
+            
+            // Blinn-Phong improved specular highlight
+            // float specular = pow(max(dot(normalize(lightDirection + viewDirection), normal), 0.0), specularPower);
+            color += mix(vec3(1.0), baseColor, metalness) * lightColors[i] * specular * specularIntensity;
+        }
+        return vec4(color, 1.0);
+    }
+`;
+
 // language=GLSL
 let fragmentShader = `
     #version 300 es
