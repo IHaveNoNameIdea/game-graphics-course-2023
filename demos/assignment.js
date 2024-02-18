@@ -192,7 +192,7 @@ function drawObjects(dc) {
 
 
 function draw(timems) {
-    time = timems * 0.001;
+    time = timems * 0.0001;
 
     vec3.set(cameraPosition, 0, 2, 4);
     mat4.perspective(projMatrix, Math.PI / 2.5, app.width / app.height, 0.1, 100.0);
