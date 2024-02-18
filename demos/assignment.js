@@ -97,7 +97,7 @@ let shadowVertexShader = `
 let bgColor = vec4.fromValues(1.0, 0.2, 0.3, 1.0);
 let fgColor = vec4.fromValues(1.0, 0.9, 0.5, 1.0);
 let texture = app.createTexture2DFromSource
-drawCall.texture("box.jpg", texture);
+//drawCall.texture("box.jpg", texture);
 
 app.enable(PicoGL.DEPTH_TEST)
    .enable(PicoGL.CULL_FACE)
