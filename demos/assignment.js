@@ -1,6 +1,3 @@
-const canvas = document.getElementById('webgl-canvas'); // Ensure you have a canvas element in your HTML
-const app = PicoGL.createApp(canvas);
-
 import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3} from "../node_modules/gl-matrix/esm/index.js";
 
