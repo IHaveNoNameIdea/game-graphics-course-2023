@@ -3,25 +3,6 @@
 import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3, vec4, quat} from "../node_modules/gl-matrix/esm/index.js";
 
-export const positions = new Float32Array([
-    // Positions data...
-]);
-export const normals = new Float32Array([
-    // Normals data...
-]);
-export const indices = new Uint32Array([
-    // Indices data...
-]);
-
-// Ensure you have this export for texCoords
-export const texCoords = new Float32Array([
-    0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
-    // Add more as necessary...
-]);
-
 import {positions, normals, indices, texCoords} from "../blender/cube.js";
 
 // language=GLSL
@@ -116,6 +97,7 @@ let shadowVertexShader = `
 let bgColor = vec4.fromValues(1.0, 0.2, 0.3, 1.0);
 let fgColor = vec4.fromValues(1.0, 0.9, 0.5, 1.0);
 let texture = app.createTexture2DFromSource
+drawCall.texture("box.jpg", texture);
 
 app.enable(PicoGL.DEPTH_TEST)
    .enable(PicoGL.CULL_FACE)
@@ -155,7 +137,6 @@ let lightPosition = vec3.create();
 let lightViewMatrix = mat4.create();
 let lightViewProjMatrix = mat4.create();
 
-drawCall.texture("box.jpg", texture);
 
 let drawCall = app.createDrawCall(program, vertexArray)
     .uniform("baseColor", fgColor)
