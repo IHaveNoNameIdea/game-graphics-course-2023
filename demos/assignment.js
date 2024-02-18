@@ -247,8 +247,8 @@ function draw(timems) {
     const time = timems * 0.001; // Use for dynamic elements
 
     // Perspective and camera setup from the second snippet with slight modifications for dynamic camera positioning
-    vec3.set(cameraPosition, Math.sin(time * 0.05) * 5, 3, Math.cos(time * 0.05) * 5);
-    mat4.perspective(projMatrix, Math.PI / 1.5, app.width / app.height, 0.1, 100.0);
+    vec3.set(cameraPosition, Math.sin(time * 0.05) * 7, 6, Math.cos(time * 0.05) * 6);
+    mat4.perspective(projMatrix, Math.PI / 2.5, app.width / app.height, 0.1, 100.0);
     mat4.lookAt(viewMatrix, cameraPosition, vec3.fromValues(0, -1, 0), vec3.fromValues(0, 3, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
