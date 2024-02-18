@@ -1,66 +1,24 @@
+// *********************************************************************************************************************
+// **                                                                                                                 **
+// **             Texturing example, Cube is mapped with 2D texture, skybox is mapped with a Cubemap                  **
+// **                                                                                                                 **
+// *********************************************************************************************************************
+
 import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3} from "../node_modules/gl-matrix/esm/index.js";
 
-import {positions, uvs, indices} from "../blender/cube.js";
+import {positions, uvs, indices} from "../blender/box.js";
 import {positions as planePositions, indices as planeIndices} from "../blender/plane.js";
-
-let baseColor = vec3.fromValues(1.0, 0.1, 0.2);
-let ambientLightColor = vec3.fromValues(0.1, 0.1, 1.0);
-let numberOfPointLights = 2;
-let pointLightColors = [vec3.fromValues(1.0, 1.0, 1.0), vec3.fromValues(0.02, 0.4, 0.5)];
-let pointLightInitialPositions = [vec3.fromValues(5, 0, 2), vec3.fromValues(-5, 0, 2)];
-let pointLightPositions = [vec3.create(), vec3.create()];
-
-let lightCalculationShader = `
-    uniform vec3 cameraPosition;
-    uniform vec3 baseColor;    
-
-    uniform vec3 ambientLightColor;    
-    uniform vec3 lightColors[${numberOfPointLights}];        
-    uniform vec3 lightPositions[${numberOfPointLights}];
-    
-    // This function calculates light reflection using Phong reflection model (ambient + diffuse + specular)
-    vec4 calculateLights(vec3 normal, vec3 position) {
-        float ambientIntensity = 0.5;
-        float diffuseIntensity = 1.0;
-        float specularIntensity = 2.0;
-        float specularPower = 100.0;
-        float metalness = 0.0;
-
-        vec3 viewDirection = normalize(cameraPosition.xyz - position);
-        vec3 color = baseColor * ambientLightColor * ambientIntensity;
-                
-        for (int i = 0; i < lightPositions(); i++) {
-            vec3 lightDirection = normalize(lightPositions[i] - position);
-            
-            // Lambertian reflection (ideal diffuse of matte surfaces) is also a part of Phong model                        
-            float diffuse = max(dot(lightDirection, normal), 0.0);                                    
-            color += baseColor * lightColors[i] * diffuse * diffuseIntensity;
-                      
-            // Phong specular highlight 
-            float specular = pow(max(dot(viewDirection, reflect(-lightDirection, normal)), 0.0), specularPower);
-            
-            // Blinn-Phong improved specular highlight
-            // float specular = pow(max(dot(normalize(lightDirection + viewDirection), normal), 0.0), specularPower);
-            color += mix(vec3(1.0), baseColor, metalness) * lightColors[i] * specular * specularIntensity;
-        }
-        return vec4(color, 1.0);
-    }
-`;
 
 // language=GLSL
 let fragmentShader = `
     #version 300 es
     precision highp float;
-    ${lightCalculationShader}
-
+    
     uniform sampler2D tex;    
     
     in vec2 v_uv;
-    in vec3 vPosition;    
-    in vec3 vNormal;
-    in vec4 vColor; 
-
+    
     out vec4 outColor;
     
     void main()
@@ -79,24 +37,12 @@ let vertexShader = `
     layout(location=1) in vec3 normal;
     layout(location=2) in vec2 uv;
         
-    uniform mat4 viewProjectionMatrix;
-    uniform mat4 modelMatrix; 
-
     out vec2 v_uv;
-    out vec3 vPosition;    
-    out vec3 vNormal;
-    out vec4 vColor;
     
     void main()
     {
         gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);           
         v_uv = uv;
-
-        vec4 worldPosition = modelMatrix * position;
-        
-        vPosition = worldPosition.xyz;        
-        vNormal = (modelMatrix * normal).xyz;
-        gl_Position = viewProjectionMatrix * worldPosition;    
     }
 `;
 
@@ -126,11 +72,10 @@ let skyboxVertexShader = `
     out vec4 v_position;
     
     void main() {
-      v_position = position;
-      gl_Position = position.xyww;
+      v_position = vec4(position.xz, 1.0, 1.0);
+      gl_Position = v_position;
     }
 `;
-app.clearColor(0.0, 0.0, 0.0, 1.0).clear();
 
 let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
 let skyboxProgram = app.createProgram(skyboxVertexShader.trim(), skyboxFragmentShader.trim());
@@ -158,18 +103,15 @@ async function loadTexture(fileName) {
     return await createImageBitmap(await (await fetch("images/" + fileName)).blob());
 }
 
-const tex = await loadTexture("box.jpg");
+const tex = await loadTexture("abstract.jpg");
 let drawCall = app.createDrawCall(program, vertexArray)
-    .texture("tex", app.createTexture2D(tex, { 
-        magFilter: PicoGL.LINEAR, 
-        minFilter: PicoGL.LINEAR_MIPMAP_LINEAR, 
+    .texture("tex", app.createTexture2D(tex, tex.width, tex.height, {
+        magFilter: PicoGL.LINEAR,
+        minFilter: PicoGL.LINEAR_MIPMAP_LINEAR,
         maxAnisotropy: 10,
         wrapS: PicoGL.REPEAT,
         wrapT: PicoGL.REPEAT
-    }))
-    .uniform("baseColor", baseColor)
-    .uniform("ambientLightColor", ambientLightColor);
-
+    }));
 
 let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
     .texture("cubemap", app.createCubemap({
@@ -181,72 +123,37 @@ let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
         posZ: await loadTexture("space_rt.png")
     }));
 
-app.enable(PicoGL.DEPTH_TEST)
-   .enable(PicoGL.CULL_FACE);
+function draw(timems) {
+    const time = timems * 0.001;
 
-
-//let vertexArray = app.createVertexArray()
-//    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions))
-//    .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 3, normals))
-//    .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, indices));
-
-let projectionMatrix = mat4.create();
-let viewProjectionMatrix = mat4.create();
-
-let cameraPosition = vec3.fromValues(0, 0, 4);
-mat4.fromXRotation(modelMatrix, -Math.PI / 2);
-
-const positionsBuffer = new Float32Array(numberOfPointLights * 3);
-const colorsBuffer = new Float32Array(numberOfPointLights * 3);
-
-function draw(timestamp) {
-    const time = timestamp * 0.001; // Use a unified time based on the timestamp provided by requestAnimationFrame
-
-    // Common projection matrix setup (choose one approach, here using FOV from the first snippet)
     mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 100.0);
-
-    // Camera setup from the first snippet (dynamic camera position)
     let camPos = vec3.rotateY(vec3.create(), vec3.fromValues(0, 0.5, 2), vec3.fromValues(0, 0, 0), time * 0.05);
     mat4.lookAt(viewMatrix, camPos, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-    // Combine model matrix calculation from the first snippet
     mat4.fromXRotation(rotateXMatrix, time * 0.1136);
     mat4.fromZRotation(rotateYMatrix, time * 0.2235);
     mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
-    // Update for dynamic lighting from the second snippet
-    for (let i = 0; i < numberOfPointLights; i++) {
-        vec3.rotateZ(pointLightPositions[i], pointLightInitialPositions[i], vec3.fromValues(0, 0, 0), time);
-        positionsBuffer.set(pointLightPositions[i], i * 3);
-        colorsBuffer.set(pointLightColors[i], i * 3);
-    }
+    mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
+    mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
 
-    // Clear the scene
-    app.clear();
-
-    // Render the skybox (from the first snippet)
-    app.disable(PicoGL.DEPTH_TEST);
-    app.disable(PicoGL.CULL_FACE);
     let skyboxViewProjectionMatrix = mat4.create();
     mat4.mul(skyboxViewProjectionMatrix, projMatrix, viewMatrix);
     mat4.invert(skyboxViewProjectionInverse, skyboxViewProjectionMatrix);
-    skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse).draw();
+
+    app.clear();
+
+    app.disable(PicoGL.DEPTH_TEST);
+    app.disable(PicoGL.CULL_FACE);
+    skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
+    skyboxDrawCall.draw();
+
     app.enable(PicoGL.DEPTH_TEST);
     app.enable(PicoGL.CULL_FACE);
-
-    // Render the main scene with lighting (combining elements from both snippets)
-    mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
-    mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
     drawCall.uniform("modelViewProjectionMatrix", modelViewProjectionMatrix);
-    drawCall.uniform("viewProjectionMatrix", viewProjMatrix); // Use viewProjMatrix for consistency
-    drawCall.uniform("modelMatrix", modelMatrix);
-    drawCall.uniform("cameraPosition", camPos);
-    drawCall.uniform("lightPositions", positionsBuffer);
-    drawCall.uniform("lightColors", colorsBuffer);
     drawCall.draw();
 
     requestAnimationFrame(draw);
 }
-
 requestAnimationFrame(draw);
