@@ -135,8 +135,8 @@ let vertexArray = app.createVertexArray()
 
 
 let skyboxArray = app.createVertexArray()
-    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, planePositions))
-    .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, planeIndices));
+    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, Positions))
+    .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, Indices));
 
 
 // Change the shadow texture resolution to checkout the difference
