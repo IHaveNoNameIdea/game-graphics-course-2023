@@ -220,7 +220,7 @@ function drawObjects(dc) {
     quat.fromEuler(rotation, time * 80, time * 56.97, 0);
     // Initial rotation of 90 degrees around the Y-axis
     let initialRotation = quat.create();
-    quat.fromEuler(initialRotation, 0, 90, 0); // 0 degrees around X, 90 degrees around Y, 0 degrees around Z
+    quat.fromEuler(initialRotation, 90, 0, 0); // 0 degrees around X, 90 degrees around Y, 0 degrees around Z
     let initialRotationMatrix = mat4.create();
     mat4.fromQuat(initialRotationMatrix, initialRotation);
     // Apply initial rotation before other transformations
