@@ -2,6 +2,7 @@ import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3} from "../node_modules/gl-matrix/esm/index.js";
 
 import {positions, normals, indices} from "../blender/ship1.js"
+import {positions as planePositions, indices as planeIndices} from "../blender/plane.js";
 
 let baseColor = vec3.fromValues(1.0, 0.1, 0.2);
 let ambientLightColor = vec3.fromValues(0.1, 0.1, 1.0);
@@ -96,31 +97,86 @@ let vertexShader = `
     }
 `;
 
+// language=GLSL
+let skyboxFragmentShader = `
+    #version 300 es
+    precision mediump float;
+    
+    uniform samplerCube cubemap;
+    uniform mat4 viewProjectionInverse;
+    in vec4 v_position;
+    
+    out vec4 outColor;
+    
+    void main() {
+      vec4 t = viewProjectionInverse * v_position;
+      outColor = texture(cubemap, normalize(t.xyz / t.w));
+    }
+`;
+
+// language=GLSL
+let skyboxVertexShader = `
+    #version 300 es
+    
+    layout(location=0) in vec4 position;
+    out vec4 v_position;
+    
+    void main() {
+      v_position = vec4(position.xz, 1.0, 1.0);
+      gl_Position = v_position;
+    }
+`;
 
 app.enable(PicoGL.DEPTH_TEST)
    .enable(PicoGL.CULL_FACE);
 
 let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
+let skyboxProgram = app.createProgram(skyboxVertexShader.trim(), skyboxFragmentShader.trim());
 
 let vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions))
     .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 3, normals))
     .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, indices));
 
+    let skyboxArray = app.createVertexArray()
+    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, planePositions))
+    .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, planeIndices));
+
 let projectionMatrix = mat4.create();
 let viewMatrix = mat4.create();
 let viewProjectionMatrix = mat4.create();
 let modelMatrix = mat4.create();
+let skyboxViewProjectionInverse = mat4.create();
 
+async function loadTexture(fileName) {
+    return await createImageBitmap(await (await fetch("images/" + fileName)).blob());
+}
+
+const tex = await loadTexture("abstract.jpg");
 let drawCall = app.createDrawCall(program, vertexArray)
-    .uniform("baseColor", baseColor)
-    .uniform("ambientLightColor", ambientLightColor);
+    .texture("tex", app.createTexture2D(tex, tex.width, tex.height, {
+        magFilter: PicoGL.LINEAR,
+        minFilter: PicoGL.LINEAR_MIPMAP_LINEAR,
+        maxAnisotropy: 10,
+        wrapS: PicoGL.REPEAT,
+        wrapT: PicoGL.REPEAT
+    }));
+
+    let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
+    .texture("cubemap", app.createCubemap({
+        negX: await loadTexture("stormydays_bk.png"),
+        posX: await loadTexture("stormydays_ft.png"),
+        negY: await loadTexture("stormydays_dn.png"),
+        posY: await loadTexture("stormydays_up.png"),
+        negZ: await loadTexture("stormydays_lf.png"),
+        posZ: await loadTexture("stormydays_rt.png")
+    }));
 
 let cameraPosition = vec3.fromValues(0, 0, 8);
 mat4.fromXRotation(modelMatrix, -Math.PI / 2);
 
 const positionsBuffer = new Float32Array(numberOfPointLights * 3);
-const colorsBuffer = new Float32Array(numberOfPointLights * 5);
+const colorsBuffer = new Float32Array(numberOfPointLights * 3);
 
 function draw(timestamp) {
     const time = timestamp * 0.001;
@@ -142,7 +198,19 @@ function draw(timestamp) {
     drawCall.uniform("lightPositions[0]", positionsBuffer);
     drawCall.uniform("lightColors[0]", colorsBuffer);
 
+    let skyboxViewProjectionMatrix = mat4.create();
+    mat4.mul(skyboxViewProjectionMatrix, projMatrix, viewMatrix);
+    mat4.invert(skyboxViewProjectionInverse, skyboxViewProjectionMatrix);
+
     app.clear();
+    app.disable(PicoGL.DEPTH_TEST);
+    app.disable(PicoGL.CULL_FACE);
+    skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
+    skyboxDrawCall.draw();
+
+    app.enable(PicoGL.DEPTH_TEST);
+    app.enable(PicoGL.CULL_FACE);
+    drawCall.uniform("modelViewProjectionMatrix", modelViewProjectionMatrix);
     drawCall.draw();
 
     requestAnimationFrame(draw);
