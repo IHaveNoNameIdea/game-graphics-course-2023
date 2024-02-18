@@ -4,14 +4,14 @@ import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3, vec4, quat} from "../node_modules/gl-matrix/esm/index.js";
 
 import {positions, normals, indices, texCoords} from "../blender/cube.js";
-export const texCoords = new Float32Array([
-    // Texture coordinates for each vertex
-    0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
-    // Repeat for each face of the cube or as necessary
-]);
+//export const texCoords = new Float32Array([
+//    // Texture coordinates for each vertex
+//    0.0, 0.0,
+//    1.0, 0.0,
+//    1.0, 1.0,
+//    0.0, 1.0,
+//    // Repeat for each face of the cube or as necessary
+//]);
 
 // language=GLSL
 let fragmentShader = `
