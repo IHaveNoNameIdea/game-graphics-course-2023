@@ -4,6 +4,7 @@ import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3, vec4, quat} from "../node_modules/gl-matrix/esm/index.js";
 
 import {positions, normals, indices} from "../blender/cube.js";
+import {positions as planePositions, indices as planeIndices} from "../blender/plane.js";
 
 // language=GLSL
 let fragmentShader = `
@@ -63,6 +64,35 @@ let vertexShader = `
     }
 `;
 
+let skyboxFragmentShader = `
+    #version 300 es
+    precision mediump float;
+    
+    uniform samplerCube cubemap;
+    uniform mat4 viewProjectionInverse;
+    in vec4 v_position;
+    
+    out vec4 outColor;
+    
+    void main() {
+      vec4 t = viewProjectionInverse * v_position;
+      outColor = texture(cubemap, normalize(t.xyz / t.w));
+    }
+`;
+
+// language=GLSL
+let skyboxVertexShader = `
+    #version 300 es
+    
+    layout(location=0) in vec4 position;
+    out vec4 v_position;
+    
+    void main() {
+      v_position = vec4(position.xz, 1.0, 1.0);
+      gl_Position = v_position;
+    }
+`;
+
 // language=GLSL
 let shadowFragmentShader = `
     #version 300 es
@@ -95,12 +125,19 @@ app.enable(PicoGL.DEPTH_TEST)
    .clearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
 
 let program = app.createProgram(vertexShader, fragmentShader);
+let skyboxProgram = app.createProgram(skyboxVertexShader.trim(), skyboxFragmentShader.trim());
 let shadowProgram = app.createProgram(shadowVertexShader, shadowFragmentShader);
 
 let vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions))
     .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 3, normals))
     .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, indices));
+
+
+let skyboxArray = app.createVertexArray()
+    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, planePositions))
+    .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, planeIndices));
+
 
 // Change the shadow texture resolution to checkout the difference
 let shadowDepthTarget = app.createTexture2D(512, 512, {
@@ -121,6 +158,7 @@ let modelMatrix = mat4.create();
 let modelViewProjectionMatrix = mat4.create();
 let rotation = quat.create();
 let lightModelViewProjectionMatrix = mat4.create();
+let skyboxViewProjectionInverse = mat4.create();
 
 let cameraPosition = vec3.create();
 let lightPosition = vec3.create();
@@ -136,6 +174,17 @@ let drawCall = app.createDrawCall(program, vertexArray)
     .uniform("lightPosition", lightPosition)
     .uniform("lightModelViewProjectionMatrix", lightModelViewProjectionMatrix)
     .texture("shadowMap", shadowDepthTarget);
+
+
+let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
+    .texture("cubemap", app.createCubemap({
+        negX: await loadTexture("space_bk.png"),
+        posX: await loadTexture("space_ft.png"),
+        negY: await loadTexture("space_dn.png"),
+        posY: await loadTexture("space_up.png"),
+        negZ: await loadTexture("space_lf.png"),
+        posZ: await loadTexture("space_rt.png")
+    }));
 
 let shadowDrawCall = app.createDrawCall(shadowProgram, vertexArray)
     .uniform("lightModelViewProjectionMatrix", lightModelViewProjectionMatrix);
@@ -192,17 +241,43 @@ function drawObjects(dc) {
 
 
 function draw(timems) {
-    time = timems * 0.0001;
+    const time = timems * 0.001; // Use a consistent time scale for animations
 
-    vec3.set(cameraPosition, 0, 2, 4);
+    // Perspective and camera setup for the scene and skybox
     mat4.perspective(projMatrix, Math.PI / 2.5, app.width / app.height, 0.1, 100.0);
-    mat4.lookAt(viewMatrix, cameraPosition, vec3.fromValues(0, -0.5, 0), vec3.fromValues(0, 1, 0));
+    let camPos = vec3.rotateY(vec3.create(), vec3.fromValues(0, 2, 4), vec3.fromValues(0, 0, 0), time * 0.05);
+    mat4.lookAt(viewMatrix, camPos, vec3.fromValues(0, -0.5, 0), vec3.fromValues(0, 1, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-    vec3.set(lightPosition, 5, 5, 2.5);
+    // Camera setup for dynamic objects and shadow map
+    vec3.set(lightPosition, 5, 5, 2.5); // Position of the light
     mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
+    // Render shadow map first
     renderShadowMap();
+
+    // Clear buffers and setup for skybox rendering
+    app.clear();
+    app.disable(PicoGL.DEPTH_TEST);
+    app.disable(PicoGL.CULL_FACE);
+
+    // Adjust the skybox view matrix to remove translation for infinite distance effect
+    let skyboxViewMatrix = mat4.clone(viewMatrix);
+    skyboxViewMatrix[12] = 0; // Remove translation component
+    skyboxViewMatrix[13] = 0;
+    skyboxViewMatrix[14] = 0;
+    let skyboxViewProjectionMatrix = mat4.create();
+    mat4.multiply(skyboxViewProjectionMatrix, projMatrix, skyboxViewMatrix);
+
+    // Render skybox
+    skyboxDrawCall.uniform("viewProjectionMatrix", skyboxViewProjectionMatrix);
+    skyboxDrawCall.draw();
+
+    // Re-enable depth test for rendering scene objects
+    app.enable(PicoGL.DEPTH_TEST);
+    app.enable(PicoGL.CULL_FACE);
+
+    // Draw scene objects with shadows
     drawObjects(drawCall);
 
     requestAnimationFrame(draw);
