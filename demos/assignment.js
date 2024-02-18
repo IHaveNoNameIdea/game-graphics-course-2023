@@ -89,7 +89,7 @@ let skyboxVertexShader = `
     
     void main() {
       v_position = position;
-      gl_Position = v_position;
+
     }
 `;
 
