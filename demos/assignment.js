@@ -90,6 +90,7 @@ let skyboxVertexShader = `
     void main() {
         v_position = position;
         gl_Position = projectionMatrix * viewMatrix * vec4(position, 1.0);
+        gl_Position.z = gl_Position.w;
     }
     
 `;
@@ -276,12 +277,17 @@ function draw(timems) {
 
     app.clear();
 
+    gl.depthMask(false);
     app.depthMask(false);
+    gl.depthFunc(gl.LEQUAL);
+    gl.clearDepth(1.0); // Ensure this is set
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     app.enable(PicoGL.DEPTH_TEST);
     app.disable(PicoGL.CULL_FACE);
     skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
     skyboxDrawCall.draw();
     app.depthMask(true);
+    gl.depthMask(true);
 
     // Draw objects with shadows
     app.enable(PicoGL.DEPTH_TEST);
