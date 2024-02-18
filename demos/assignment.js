@@ -236,7 +236,7 @@ function drawObjects(dc) {
     dc.draw();
 
     // Small object - Moves in a circle
-    let smallBoxAngle = time * 1.5; // Faster circular movement
+    let smallBoxAngle = time * 2; // Faster circular movement
     let smallBoxRadius = 0.6; // Smaller radius for tighter circle
     let smallBoxX = Math.cos(smallBoxAngle) * smallBoxRadius + 0.9;
     let smallBoxZ = Math.sin(smallBoxAngle) * smallBoxRadius + 0.6;
