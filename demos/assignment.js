@@ -281,6 +281,7 @@ function draw(timems) {
     viewMatrixForSkybox[12] = 0;
     viewMatrixForSkybox[13] = 0;
     viewMatrixForSkybox[14] = 0;
+    
     let skyboxViewProjectionMatrix = mat4.create();
     mat4.multiply(skyboxViewProjectionMatrix, projMatrix, viewMatrixForSkybox);
     app.depthMask(false);
