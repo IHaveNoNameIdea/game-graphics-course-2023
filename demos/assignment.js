@@ -1,11 +1,7 @@
 import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3} from "../node_modules/gl-matrix/esm/index.js";
 
-import {positions, normals, indices} from "../blender/monkey.js"
-
-// ******************************************************
-// **               Light configuration                **
-// ******************************************************
+import {positions, normals, indices} from "../blender/ship1.js"
 
 let baseColor = vec3.fromValues(1.0, 0.1, 0.2);
 let ambientLightColor = vec3.fromValues(0.1, 0.1, 1.0);
@@ -120,7 +116,7 @@ let drawCall = app.createDrawCall(program, vertexArray)
     .uniform("baseColor", baseColor)
     .uniform("ambientLightColor", ambientLightColor);
 
-let cameraPosition = vec3.fromValues(0, 0, 4);
+let cameraPosition = vec3.fromValues(0, 0, 3);
 mat4.fromXRotation(modelMatrix, -Math.PI / 2);
 
 const positionsBuffer = new Float32Array(numberOfPointLights * 3);
