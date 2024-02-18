@@ -4,7 +4,14 @@ import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3, vec4, quat} from "../node_modules/gl-matrix/esm/index.js";
 
 import {positions, normals, indices, texCoords} from "../blender/cube.js";
-
+export const texCoords = new Float32Array([
+    // Texture coordinates for each vertex
+    0.0, 0.0,
+    1.0, 0.0,
+    1.0, 1.0,
+    0.0, 1.0,
+    // Repeat for each face of the cube or as necessary
+]);
 
 // language=GLSL
 let fragmentShader = `
@@ -109,7 +116,7 @@ let shadowProgram = app.createProgram(shadowVertexShader, shadowFragmentShader);
 let vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions)) // Vertex positions
     .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 3, normals)) // Normal vectors
-    .vertexAttributeBuffer(2, app.createVertexBuffer(PicoGL.FLOAT, 2, texCoords)) // Texture coordinates
+    .vertexAttributeBuffer(2, app.createVertexBuffer(PicoGL.FLOAT, 2, texCoords))
     .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, indices));
 
 // Change the shadow texture resolution to checkout the difference
