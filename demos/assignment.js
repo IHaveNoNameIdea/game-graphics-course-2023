@@ -1,8 +1,5 @@
-// *********************************************************************************************************************
-// **                                                                                                                 **
-// **             Texturing example, Cube is mapped with 2D texture, skybox is mapped with a Cubemap                  **
-// **                                                                                                                 **
-// *********************************************************************************************************************
+const canvas = document.getElementById('webgl-canvas'); // Ensure you have a canvas element in your HTML
+const app = PicoGL.createApp(canvas);
 
 import PicoGL from "../node_modules/picogl/build/module/picogl.js";
 import {mat4, vec3} from "../node_modules/gl-matrix/esm/index.js";
@@ -58,11 +55,15 @@ let lightCalculationShader = `
 let fragmentShader = `
     #version 300 es
     precision highp float;
-    
+    ${lightCalculationShader}
+
     uniform sampler2D tex;    
     
     in vec2 v_uv;
-    
+    in vec3 vPosition;    
+    in vec3 vNormal;
+    in vec4 vColor; 
+
     out vec4 outColor;
     
     void main()
@@ -81,12 +82,24 @@ let vertexShader = `
     layout(location=1) in vec3 normal;
     layout(location=2) in vec2 uv;
         
+    uniform mat4 viewProjectionMatrix;
+    uniform mat4 modelMatrix; 
+
     out vec2 v_uv;
+    out vec3 vPosition;    
+    out vec3 vNormal;
+    out vec4 vColor;
     
     void main()
     {
         gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);           
         v_uv = uv;
+
+        vec4 worldPosition = modelMatrix * position;
+        
+        vPosition = worldPosition.xyz;        
+        vNormal = (modelMatrix * normal).xyz;
+        gl_Position = viewProjectionMatrix * worldPosition;    
     }
 `;
 
@@ -155,6 +168,8 @@ let drawCall = app.createDrawCall(program, vertexArray)
         maxAnisotropy: 10,
         wrapS: PicoGL.REPEAT,
         wrapT: PicoGL.REPEAT
+        .uniform("baseColor", baseColor)
+        .uniform("ambientLightColor", ambientLightColor)
     }));
 
 let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
@@ -167,37 +182,72 @@ let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
         posZ: await loadTexture("space_rt.png")
     }));
 
-function draw(timems) {
-    const time = timems * 0.001;
+app.enable(PicoGL.DEPTH_TEST)
+   .enable(PicoGL.CULL_FACE);
 
+
+//let vertexArray = app.createVertexArray()
+//    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions))
+//    .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 3, normals))
+//    .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, indices));
+
+let projectionMatrix = mat4.create();
+let viewProjectionMatrix = mat4.create();
+
+let cameraPosition = vec3.fromValues(0, 0, 4);
+mat4.fromXRotation(modelMatrix, -Math.PI / 2);
+
+const positionsBuffer = new Float32Array(numberOfPointLights * 3);
+const colorsBuffer = new Float32Array(numberOfPointLights * 3);
+
+function draw(timestamp) {
+    const time = timestamp * 0.001; // Use a unified time based on the timestamp provided by requestAnimationFrame
+
+    // Common projection matrix setup (choose one approach, here using FOV from the first snippet)
     mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 100.0);
+
+    // Camera setup from the first snippet (dynamic camera position)
     let camPos = vec3.rotateY(vec3.create(), vec3.fromValues(0, 0.5, 2), vec3.fromValues(0, 0, 0), time * 0.05);
     mat4.lookAt(viewMatrix, camPos, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
+    // Combine model matrix calculation from the first snippet
     mat4.fromXRotation(rotateXMatrix, time * 0.1136);
     mat4.fromZRotation(rotateYMatrix, time * 0.2235);
     mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
-    mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
-    mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
+    // Update for dynamic lighting from the second snippet
+    for (let i = 0; i < numberOfPointLights; i++) {
+        vec3.rotateZ(pointLightPositions[i], pointLightInitialPositions[i], vec3.fromValues(0, 0, 0), time);
+        positionsBuffer.set(pointLightPositions[i], i * 3);
+        colorsBuffer.set(pointLightColors[i], i * 3);
+    }
 
+    // Clear the scene
+    app.clear();
+
+    // Render the skybox (from the first snippet)
+    app.disable(PicoGL.DEPTH_TEST);
+    app.disable(PicoGL.CULL_FACE);
     let skyboxViewProjectionMatrix = mat4.create();
     mat4.mul(skyboxViewProjectionMatrix, projMatrix, viewMatrix);
     mat4.invert(skyboxViewProjectionInverse, skyboxViewProjectionMatrix);
-
-    app.clear();
-
-    app.disable(PicoGL.DEPTH_TEST);
-    app.disable(PicoGL.CULL_FACE);
-    skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse);
-    skyboxDrawCall.draw();
-
+    skyboxDrawCall.uniform("viewProjectionInverse", skyboxViewProjectionInverse).draw();
     app.enable(PicoGL.DEPTH_TEST);
     app.enable(PicoGL.CULL_FACE);
+
+    // Render the main scene with lighting (combining elements from both snippets)
+    mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
+    mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
     drawCall.uniform("modelViewProjectionMatrix", modelViewProjectionMatrix);
+    drawCall.uniform("viewProjectionMatrix", viewProjMatrix); // Use viewProjMatrix for consistency
+    drawCall.uniform("modelMatrix", modelMatrix);
+    drawCall.uniform("cameraPosition", camPos);
+    drawCall.uniform("lightPositions[0]", positionsBuffer);
+    drawCall.uniform("lightColors[0]", colorsBuffer);
     drawCall.draw();
 
     requestAnimationFrame(draw);
 }
+
 requestAnimationFrame(draw);
