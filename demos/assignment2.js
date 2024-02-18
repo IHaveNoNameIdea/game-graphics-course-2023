@@ -298,7 +298,18 @@ function draw(timems) {
     app.enable(PicoGL.CULL_FACE);
     drawObjects(drawCall); // Assuming drawObjects() handles drawing with the shadow map
 
+    app.enable(PicoGL.CULL_FACE);
+    
+    // Update uniforms for dynamic objects and lighting
+    drawCall.uniform("cameraPosition", cameraPosition);
+    drawCall.uniform("lightPosition", lightPosition);
+    
+    // Draw dynamic and static objects with updated transformations and lighting
+    drawObjects(drawCall);
+    
+    // Request the next frame
     requestAnimationFrame(draw);
 }
 
+// Start the rendering loop
 requestAnimationFrame(draw);
