@@ -1,27 +1,9 @@
 // Shadow mapping demo
 
-import {positions, normals, indices, uvs} from "../blender/cube.js";
-import { vec4, mat4, quat, vec3 } from 'gl-matrix';
-import * as PicoGL from 'picogl';
+import PicoGL from "../node_modules/picogl/build/module/picogl.js";
+import {mat4, vec3, vec4, quat} from "../node_modules/gl-matrix/esm/index.js";
 
-let app; 
-let image = new Image();
-image.onload = function() {
-    app = PicoGL.createApp(document.body) 
-        .enable(PicoGL.DEPTH_TEST)
-        .enable(PicoGL.CULL_FACE);
-    
-    let texture = app.createTexture2D(image, {
-        minFilter: PicoGL.LINEAR_MIPMAP_LINEAR,
-        magFilter: PicoGL.LINEAR,
-        wrapS: PicoGL.REPEAT,
-        wrapT: PicoGL.REPEAT
-    });
-    texture.generateMipmap();
-
-    requestAnimationFrame(draw);
-};
-image.src = "../demos/images/box.jpg";
+import {positions, normals, indices} from "../blender/cube.js";
 
 // language=GLSL
 let fragmentShader = `
@@ -29,14 +11,12 @@ let fragmentShader = `
     precision highp float;    
     precision highp sampler2DShadow;
     
-    uniform sampler2D uTexture;
     uniform vec4 baseColor;
     uniform vec4 ambientColor;
     uniform vec3 lightPosition;
     uniform vec3 cameraPosition;    
     uniform sampler2DShadow shadowMap;
     
-    in vec2 vTexCoord;
     in vec3 vPosition;
     in vec3 vNormal;
     in vec4 vPositionFromLight;
@@ -51,11 +31,10 @@ let fragmentShader = `
         vec3 eyeDirection = normalize(cameraPosition - vPosition);
         vec3 lightDirection = normalize(lightPosition - vPosition);        
         vec3 reflectionDirection = reflect(-lightDirection, normal);
-        vec4 textureColor = texture(uTexture, vTexCoord);
         
         float diffuse = max(dot(lightDirection, normal), 0.0) * max(shadow, 0.2);        
         float specular = shadow * pow(max(dot(reflectionDirection, eyeDirection), 0.0), 100.0) * 0.7;
-        fragColor = vec4(diffuse * baseColor.rgb + ambientColor.rgb + specular, baseColor.a) * textureColor;
+        fragColor = vec4(diffuse * baseColor.rgb + ambientColor.rgb + specular, baseColor.a);
     }
 `;
 
@@ -65,14 +44,11 @@ let vertexShader = `
     
     layout(location=0) in vec4 position;
     layout(location=1) in vec3 normal;
-    layout(location=2) in vec2 texCoord;
     
     uniform mat4 modelMatrix;
     uniform mat4 modelViewProjectionMatrix;
     uniform mat4 lightModelViewProjectionMatrix;
     
-    out vec2 vTexCoord;
-
     out vec3 vPosition;
     out vec3 vNormal;
     out vec4 vPositionFromLight;
@@ -84,7 +60,6 @@ let vertexShader = `
         vPosition = vec3(modelMatrix * position);
         vNormal = vec3(modelMatrix * vec4(normal, 0.0));
         vPositionFromLight = lightModelViewProjectionMatrix * position;
-        vTexCoord = texCoord;
     }
 `;
 
@@ -114,8 +89,6 @@ let shadowVertexShader = `
 
 let bgColor = vec4.fromValues(1.0, 0.2, 0.3, 1.0);
 let fgColor = vec4.fromValues(1.0, 0.9, 0.5, 1.0);
-//let texture = app.createTexture2DFromSource("box.jpg", texture);
-//drawCall.texture("box.jpg", texture);
 
 app.enable(PicoGL.DEPTH_TEST)
    .enable(PicoGL.CULL_FACE)
@@ -125,9 +98,8 @@ let program = app.createProgram(vertexShader, fragmentShader);
 let shadowProgram = app.createProgram(shadowVertexShader, shadowFragmentShader);
 
 let vertexArray = app.createVertexArray()
-    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions)) // Vertex positions
-    .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 3, normals)) // Normal vectors
-    .vertexAttributeBuffer(2, app.createVertexBuffer(PicoGL.FLOAT, 2, uvs))
+    .vertexAttributeBuffer(0, app.createVertexBuffer(PicoGL.FLOAT, 3, positions))
+    .vertexAttributeBuffer(1, app.createVertexBuffer(PicoGL.FLOAT, 3, normals))
     .indexBuffer(app.createIndexBuffer(PicoGL.UNSIGNED_INT, 3, indices));
 
 // Change the shadow texture resolution to checkout the difference
@@ -154,7 +126,6 @@ let cameraPosition = vec3.create();
 let lightPosition = vec3.create();
 let lightViewMatrix = mat4.create();
 let lightViewProjMatrix = mat4.create();
-
 
 let drawCall = app.createDrawCall(program, vertexArray)
     .uniform("baseColor", fgColor)
@@ -189,7 +160,7 @@ function drawObjects(dc) {
     app.clear();
 
     // Middle object
-    quat.fromEuler(rotation, time * 30, time * 40, time * 50); // Adjust values as needed
+    quat.fromEuler(rotation, time * 48.24, time * 56.97, 0);
     mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(0, 0, 0), [0.8, 0.8, 0.8]);
     mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
     mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
