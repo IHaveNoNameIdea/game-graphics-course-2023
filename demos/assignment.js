@@ -33,7 +33,7 @@ let lightCalculationShader = `
         vec3 viewDirection = normalize(cameraPosition.xyz - position);
         vec3 color = baseColor * ambientLightColor * ambientIntensity;
                 
-        for (int i = 0; i < lightPositions.length(); i++) {
+        for (int i = 0; i < lightPositions(); i++) {
             vec3 lightDirection = normalize(lightPositions[i] - position);
             
             // Lambertian reflection (ideal diffuse of matte surfaces) is also a part of Phong model                        
@@ -129,8 +129,8 @@ let skyboxVertexShader = `
     out vec4 v_position;
     
     void main() {
-      v_position = vec4(position.xz, 1.0, 1.0);
-      gl_Position = v_position;
+      v_position = position;
+      gl_Position = position.xyww;
     }
 `;
 
@@ -162,15 +162,16 @@ async function loadTexture(fileName) {
 
 const tex = await loadTexture("box.jpg");
 let drawCall = app.createDrawCall(program, vertexArray)
-    .texture("tex", app.createTexture2D(tex, tex.width, tex.height, {
-        magFilter: PicoGL.LINEAR,
-        minFilter: PicoGL.LINEAR_MIPMAP_LINEAR,
+    .texture("tex", app.createTexture2D(tex, { 
+        magFilter: PicoGL.LINEAR, 
+        minFilter: PicoGL.LINEAR_MIPMAP_LINEAR, 
         maxAnisotropy: 10,
         wrapS: PicoGL.REPEAT,
         wrapT: PicoGL.REPEAT
-        .uniform("baseColor", baseColor)
-        .uniform("ambientLightColor", ambientLightColor)
-    }));
+    }))
+    .uniform("baseColor", baseColor)
+    .uniform("ambientLightColor", ambientLightColor);
+
 
 let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
     .texture("cubemap", app.createCubemap({
@@ -237,14 +238,14 @@ function draw(timestamp) {
     app.enable(PicoGL.CULL_FACE);
 
     // Render the main scene with lighting (combining elements from both snippets)
-    mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
     mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
+    mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
     drawCall.uniform("modelViewProjectionMatrix", modelViewProjectionMatrix);
     drawCall.uniform("viewProjectionMatrix", viewProjMatrix); // Use viewProjMatrix for consistency
     drawCall.uniform("modelMatrix", modelMatrix);
     drawCall.uniform("cameraPosition", camPos);
-    drawCall.uniform("lightPositions[0]", positionsBuffer);
-    drawCall.uniform("lightColors[0]", colorsBuffer);
+    drawCall.uniform("lightPositions", positionsBuffer);
+    drawCall.uniform("lightColors", colorsBuffer);
     drawCall.draw();
 
     requestAnimationFrame(draw);
