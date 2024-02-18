@@ -223,16 +223,16 @@ function drawObjects(dc) {
     mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
     dc.draw();
 
-    // Small object - Moves in a circle
-    let smallBoxAngle = time * 10; // Faster circular movement
-    let smallBoxRadius = 0.8; // Smaller radius for tighter circle
-    let smallBoxX = Math.cos(smallBoxAngle) * smallBoxRadius + 0.9;
-    let smallBoxZ = Math.sin(smallBoxAngle) * smallBoxRadius + 0.6;
-    quat.fromEuler(rotation, time * 25, time * 17, 0);
-    mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(smallBoxX, 0.9, smallBoxZ), [0.22, 0.22, 0.22]);
-    mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
-    mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
-    dc.draw();
+ //   // Small object - Moves in a circle
+ //   let smallBoxAngle = time * 10; // Faster circular movement
+ //   let smallBoxRadius = 0.8; // Smaller radius for tighter circle
+ //   let smallBoxX = Math.cos(smallBoxAngle) * smallBoxRadius + 0.9;
+ //   let smallBoxZ = Math.sin(smallBoxAngle) * smallBoxRadius + 0.6;
+ //   quat.fromEuler(rotation, time * 25, time * 17, 0);
+ //   mat4.fromRotationTranslationScale(modelMatrix, rotation, vec3.fromValues(smallBoxX, 0.9, smallBoxZ), [0.22, 0.22, 0.22]);
+ //   mat4.multiply(modelViewProjectionMatrix, viewProjMatrix, modelMatrix);
+ //   mat4.multiply(lightModelViewProjectionMatrix, lightViewProjMatrix, modelMatrix);
+ //   dc.draw();
 }
 
 
