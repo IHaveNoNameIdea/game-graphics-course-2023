@@ -9,6 +9,7 @@ import {positions as planePositions, indices as planeIndices} from "../blender/p
 // language=GLSL
 let fragmentShader = `
     #version 300 es    
+    varying highp vec3 v_position;
     precision highp float;    
     precision highp sampler2DShadow;
     
@@ -42,6 +43,8 @@ let fragmentShader = `
 // language=GLSL
 let vertexShader = `
     #version 300 es
+    
+    varying highp vec3 v_position;
     
     layout(location=0) in vec4 position;
     layout(location=1) in vec3 normal;
