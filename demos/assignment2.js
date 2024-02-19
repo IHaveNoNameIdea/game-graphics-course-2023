@@ -9,7 +9,6 @@ import {positions as planePositions, indices as planeIndices} from "../blender/p
 // language=GLSL
 let fragmentShader = `
     #version 300 es    
-    varying highp vec3 v_position;
     precision highp float;    
     precision highp sampler2DShadow;
     
@@ -43,8 +42,6 @@ let fragmentShader = `
 // language=GLSL
 let vertexShader = `
     #version 300 es
-    
-    varying highp vec3 v_position;
     
     layout(location=0) in vec4 position;
     layout(location=1) in vec3 normal;
@@ -304,8 +301,8 @@ function draw(timems) {
     app.enable(PicoGL.CULL_FACE);
     
     // Update uniforms for dynamic objects and lighting
-    drawCall.uniform("cameraPosition[0]", cameraPosition);
-    drawCall.uniform("lightPosition[0]", lightPosition);
+    drawCall.uniform("cameraPosition", cameraPosition);
+    drawCall.uniform("lightPosition", lightPosition);
     
     // Draw dynamic and static objects with updated transformations and lighting
     drawObjects(drawCall);
