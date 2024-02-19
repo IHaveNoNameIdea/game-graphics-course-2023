@@ -301,8 +301,8 @@ function draw(timems) {
     app.enable(PicoGL.CULL_FACE);
     
     // Update uniforms for dynamic objects and lighting
-    drawCall.uniform("cameraPosition", cameraPosition);
-    drawCall.uniform("lightPosition", lightPosition);
+    drawCall.uniform("cameraPosition[0]", cameraPosition);
+    drawCall.uniform("lightPosition[0]", lightPosition);
     
     // Draw dynamic and static objects with updated transformations and lighting
     drawObjects(drawCall);
