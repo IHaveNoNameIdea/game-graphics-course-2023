@@ -126,9 +126,9 @@ let skyboxDrawCall = app.createDrawCall(skyboxProgram, skyboxArray)
 function draw(timems) {
     const time = timems * 0.001;
 
-    mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 100.0);
+    mat4.perspective(projMatrix, Math.PI / 5, app.width / app.height, 0.1, 100.0);
     let camPos = vec3.rotateY(vec3.create(), vec3.fromValues(0, 0.5, 2), vec3.fromValues(0, 0, 0), time * 0.05);
-    mat4.lookAt(viewMatrix, camPos, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 2));
+    mat4.lookAt(viewMatrix, camPos, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
     mat4.fromXRotation(rotateXMatrix, time * 0.1136);
